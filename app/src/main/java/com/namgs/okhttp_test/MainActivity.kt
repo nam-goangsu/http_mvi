@@ -26,10 +26,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-
-
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 
 // Model data class (json 형식)
@@ -80,14 +82,34 @@ class OilPriceViewModel : ViewModel() {
             _state.value = State.Loading // intent에 현재 상태 정보 전달
 
             try {
-                delay(1000)
+                delay(1000) // 로딩 화면
 
-                val api_key = BuildConfig.API_KEY
+                val api_key = BuildConfig.API_KEY  // apikey hide
+
+
+                //post 방식으로 전달
+                val formBody = FormBody.Builder()
+                    .add("code", api_key) // 여기에 실제 API 키를 입력하세요.
+                    .add("out", "json")
+                    .build()
+                                /*
+                //get 방식으로 데이터 전달
                 val request = Request.Builder()
                     .url("https://www.opinet.co.kr/api/avgAllPrice.do?code="+api_key+"&out=json")
+                    .get()
+                    .build()
+                    */
+
+
+                val request = Request.Builder()  //post 방식으로 데이터 전달
+                    .url("https://www.opinet.co.kr/api/avgAllPrice.do?")
+                    .post(formBody)
                     .build()
 
+
+//정상적으로 수신시
                 client.newCall(request).execute().use { response ->
+
                     if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
                     val responseBody = response.body?.string()
@@ -97,7 +119,7 @@ class OilPriceViewModel : ViewModel() {
                    // Log.d("test","oilPriceResponse ${oilPriceResponse}")
 
 
-
+                    //정상 수신시 INTENT 값이 성공인 경우
                     _state.value = State.Success(oilPriceResponse.result.oil)
                    // Log.d("test","_state.value ${_state.value}")
                 }
