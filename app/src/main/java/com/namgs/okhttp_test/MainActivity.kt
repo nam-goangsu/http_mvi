@@ -82,8 +82,9 @@ class OilPriceViewModel : ViewModel() {
             try {
                 delay(1000)
 
+                val api_key = BuildConfig.API_KEY
                 val request = Request.Builder()
-                    .url("https://www.opinet.co.kr/api/avgAllPrice.do?")
+                    .url("https://www.opinet.co.kr/api/avgAllPrice.do?code="+api_key+"&out=json")
                     .build()
 
                 client.newCall(request).execute().use { response ->
